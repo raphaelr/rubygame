@@ -72,7 +72,7 @@ class Rubygame::TTF
   def initialize( file, size )
     self.class.setup
 
-    @struct = SDL::TTF.OpenFont( file, size )
+    @struct = SDL::TTF.OpenFont( file.to_s, size )
 
     if( @struct.pointer.null? )
       raise Rubygame::SDLError, "Could not open font: #{SDL.GetError()}"

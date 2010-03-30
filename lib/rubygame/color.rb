@@ -102,9 +102,19 @@ module Rubygame
     end
 
     def self.make_sdl_rgba( color ) # :nodoc:
-      r,g,b,a = convert_color(color).collect!{ |c| c.to_i }[0,4]
-      a = 255 if a.nil?
-      [r,g,b,a]
+      @rgba_cache ||= {}
+      @rgba_cache[color] ||=
+        begin
+          r,g,b,a = convert_color(color).collect!{ |c| c.to_i }[0,4]
+          a ||= 255
+          [r,g,b,a].freeze
+        end
+    end
+
+
+    def self.remove_from_cache( color_name )
+      @rgba_cache ||= {}
+      @rgba_cache.delete( color_name )
     end
 
 	end
