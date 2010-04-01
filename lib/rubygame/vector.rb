@@ -1,4 +1,3 @@
-﻿# A realistic 2D Vector class.
 #--
 # Rubygame::Vector -- A realistic 2D Vector class
 # Copyright (C) 2010  Raphael Robatsch
@@ -18,6 +17,68 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #++
 
+module Rubygame
+	# Shortcut for Rubygame::Vector.new
+	def Vector(*args)
+		return Vector.new(*args)
+	end
+end
+
+# A Math(tm)-compatible 2D Vector class.
+# 
+# == Features:
+# formatting:: <tt>Vector#to_s</tt>, <tt>Vector#inspect</tt>
+#              <tt>Vector(4, 3).to_s       # => "Vector(4, 3)"
+#              <tt>Vector(4, 3).inspect    # => "Vector(4, 3); r=5.0; w=0.6435..."</tt>
+# simplifying:: <tt>Vector#simplify</tt>, <tt>Vector#simplify!</tt>
+#               <tt>Vector(10, 5).simplify    # => Vector(2, 1)</tt>
+# unit vectors:: <tt>Vector#unit</tt>, <tt>Vector#unit!</tt>
+#                Sets the vector's length to 1.
+#                <tt>Vector(4, 3).unit    # => Vector(4/5, 3/5)</tt>
+# adding, substracting:: <tt>Vector#+</tt>, <tt>Vector#-</tt>
+#                        Simple vector math.
+#                        <tt>Vector(4, 3) + Vector(2, 9)    # => Vector(6, 12)</tt>
+# multiplication:: <tt>Vector#*</tt>
+#                  Multiplicates a vector with a number.
+#                  <tt>Vector(4, 3) * 5    # => Vector(20, 15)</tt>
+# division:: <tt>Vector#/</tt>
+#            Divides a vector by a number.
+#            <tt>Vector(20, 16) / 2    # => Vector(10, 8)</tt>
+# unary minus:: <tt>Vector#-@</tt>
+#               <tt>-Vector(4, 3)    # => Vector(-4, -3)</tt>
+# dot-product:: <tt>Vector#*</tt>
+#               Calculated using the formula <tt>x0 * x1 + y0 * y1</tt>.
+#               <tt>Vector(2, 3) * Vector(-1, 4)    # => 10</tt>
+# cross-product:: <tt>Vector#cross</tt>
+#                 Use it to get the area of a paralellogram enclosed by
+#                 two vectors. Divide by two for a triangle.
+#                 <tt>Vector(5, 1).cross(Vector(2, 8)).length    # => 40.0499...</tt>
+# scaling:: <tt>Vector#scale</tt>, <tt>Vector#scale!</tt>
+#           Scales a vector along the x- and y-Axis.
+#           <tt>Vector(4, 8).scale(2, 3)    # => Vector(8, 24)</tt>
+#           <tt>Vector(4, 9).scale(2)       # => Vector(8, 18)</tt>
+# normal vectors:: <tt>Vector#normal</tt>
+#                  Returns a vector that is normal at _self_.
+#                  <tt>Vector(4, 8).normal    # => Vector(8, -4)</tt>
+# normal at:: <tt>Vector#normal_at?</tt>
+#             Checks if a vector is normal at _self_.
+#             <tt>Vector(4, 8).normal_at?(Vector(8, -4))    # => true</tt>
+# enclosed angle:: <tt>Vector#enclosed_angle</tt>
+#                  Returns the angle enclosed by two vectors.
+#                  <tt>Vector(10, 3).enclosed_angle(Vector(3, 7))    # => 0.8744...</tt>
+# polar coordinates:: <tt>Vector#r</tt>, <tt>Vector#r=</tt>, <tt>Vector#w</tt>, <tt>Vector#w=</tt>
+#                     Guess what they do.
+# phase:: <tt>Vector::phase</tt>, <tt>Vector::rubygame</tt>
+#         Changes the way <tt>Vector#w</tt> and <tt>Vector#w=</tt> handles angles.
+#         <tt>Vector::rubygame</tt> sets the phase to -PI/2, so the "top" will be at
+#         zero rads.
+#         *NOTE:* changing this value will affect *ALL* already created vectors too!
+# 
+# <tt>Vector#r</tt>, <tt>Vector#r=</tt>, <tt>Vector#w</tt>, <tt>Vector#w=</tt> are aliased
+# as <tt>Vector#length</tt>, <tt>Vector#length=</tt>, <tt>Vector#angle</tt> and
+# <tt>Vector#angle=</tt> for your convenience.
+# 
+# I want RDoc-Linebreaks. Now.
 class Rubygame::Vector
 	PI = Math::PI
 	HALF_PI = PI / 2
@@ -37,29 +98,26 @@ class Rubygame::Vector
 		@@phase = pv
 	end
 	
-	attr_reader :x, :y
-	attr_reader :r, :w
-	
 	# Initializes a new vector.
 	# 
 	# args are in one of the following formats:
-	#   * two ints, _x_ and _y_
-	#   * one array, [_x_, _y_]
-	#   * one vector
-	#   * three parameters, _:cartesian_, _x_, _y_
-	#   * three parameters, _:polar_, _r_, _w_
+	# * two ints, _x_ and _y_
+	# * one array, [_x_, _y_]
+	# * one vector
+	# * three parameters, _:cartesian_, _x_, _y_
+	# * three parameters, _:polar_, _r_, _w_
 	def initialize(*args)
 		@@phase ||= 0.0
 		
 		if args.size == 2
 			@x = args[0]
-			@y = args[0]
+			@y = args[1]
 			_recalculate_polar
-		elsif args.size == 1 && args[0].kind_of? Array
+		elsif args.size == 1 && args[0].kind_of?(Array)
 			@x = args[0][0]
 			@y = args[0][1]
 			_recalculate_polar
-		elsif args.size == 1 && args[0].kind_of? Vector
+		elsif args.size == 1 && args[0].kind_of?(Vector)
 			@x = args[0].x
 			@y = args[0].y
 			_recalculate_polar
@@ -71,14 +129,31 @@ class Rubygame::Vector
 			@r = args[1]
 			@w = args[2]
 			_recalculate_cartesian
+		else
+			raise ArgumentError.new("Invalid constructor parameters!")
 		end
+	end
+	
+	# Returns a string in the format "Vector(_x_/_y_)".
+	def to_s
+		return "Vector(#{x}/#{y})"
+	end
+	
+	# Returns a string in the format "Vector(_x_/_y_); r=_r_; w=_w_".
+	def inspect
+		return "Vector(#{x}/#{y}); r=#{r}; w=#{w}"
+	end
+	
+	# Checks if two vectors are the same.
+	def ==(other)
+		return x == other.x && y == other.y rescue false
 	end
 	
 	# Simplifies the vector and returns _self_.
 	def simplify!
 		simp = Rational(x, y)
-		x = simp.numerator
-		y = simp.denumerator
+		self.x = simp.numerator
+		self.y = simp.denominator
 		_recalculate_polar
 		return self
 	end
@@ -86,20 +161,20 @@ class Rubygame::Vector
 	# Like _simplify!_, but doesn't change _self_.
 	def simplify
 		simp = Rational(x, y)
-		return self.class.new(simp.numerator, simp.denumerator)
+		return self.class.new(simp.numerator, simp.denominator)
 	end
 	
+	def _recalculate_cartesian # :nodoc:
+		@x = r * Math.cos(w - @@phase)
+		@y = r * Math.sin(w - @@phase)
+	end
 	private :_recalculate_cartesian
-	def _recalculate_cartesian
-		x = r * Math.cos(w - @@phase)
-		y = r * Math.sin(w - @@phase)
-	end
 	
-	private :_recalculate_polar
-	def _recalculate_polar
+	def _recalculate_polar # :nodoc:
 		@r = Math.sqrt(x * x + y * y)
-		@w = Math.atan2(w - @@phase)
+		@w = Math.atan2(y, x) + @@phase
 	end
+	private :_recalculate_polar
 	
 	# Sets the x-Coordinate of the vector to _other_.
 	def x=(other)
@@ -107,27 +182,41 @@ class Rubygame::Vector
 		_recalculate_polar
 	end
 	
+	# Gets the x-Coordinate of _self_.
+	def x; return @x; end
+	
 	# Sets the y-Coordinate of the vector to _other_.
 	def y=(other)
 		@y = other
 		_recalculate_polar
 	end
 	
-	alias :length= :r=
-	alias :length :r
+	# Gets the y-Coordinate of _self_.
+	def y; return @y; end
+	
 	# Sets the length of the vector to _other_.
 	def r=(other)
 		@r = other
 		_recalculate_cartesian
 	end
 	
-	alias :angle= :w=
-	alias :angle :w
+	# Gets the length of _self_.
+	def r; return @r; end
+	
+	alias :length= :r=
+	alias :length :r
+	
 	# Sets the angle of the vector to _other_.
 	def w=(other)
 		@w = other
 		_recalculate_cartesian
 	end
+	
+	# Gets the angle of _self_.
+	def w; return @w; end
+	
+	alias :angle= :w=
+	alias :angle :w
 	
 	# Unary Minus.
 	def -@
@@ -153,9 +242,9 @@ class Rubygame::Vector
 	# 
 	# *Sidenote*: The dot product of two vectors is <tt>x1 * x2 + y1 * y2</tt>.
 	def *(other)
-		if other.kind_of? Integer || other.kind_of? Float
+		if other.kind_of?(Integer) || other.kind_of?(Float)
 			return self.class.new(x * other, y * other)
-		elsif other.kind_of? Vector
+		elsif other.kind_of?(Vector)
 			return x * other.x + y * other.y
 		else
 			raise ArgumentError.new("Invalid parameter class (valid are Integers and Vectors)!")
@@ -164,25 +253,27 @@ class Rubygame::Vector
 	
 	# Returns a new Vector(x / other, y / other)
 	def /(other)
-		unless other.kind_of? Integer || other.kind_of? Float
+		unless other.kind_of?(Integer) || other.kind_of?(Float)
 			raise ArgumentError.new("You can only divide vector / number!")
 		end
 		return self.class.new(x / other, y / other)
 	end
 	
-	# Calculates the cross product of _self_ and _other_. Useful only for calculating
-	# the area of a parallelogram enclosed by two vectors.
+	# Calculates the cross product of _self_ and _other_. The Vector this
+	# method returns is pretty much useless, but it's length is the area
+	# of a paralellogram enclosed by _self_ and _other_. If you want the
+	# area of a triangle, divide by two.
 	def cross(other)
 		raise ArgumentError.new("You can only cross two vectors!") unless other.kind_of? Vector
-		return self.class.new(x - other.y, -y + other.x)
+		return self.class.new(x * other.y, y * other.x)
 	end
 	
 	# Scales the vector on both the x and the y axis or both if the _sy_ - parameter
 	# is left out.
 	def scale!(sx, sy = nil)
 		sy ||= sx
-		x *= sx
-		y *= sy
+		self.x *= sx
+		self.y *= sy
 		_recalculate_polar
 		return self
 	end
@@ -195,8 +286,7 @@ class Rubygame::Vector
 	
 	# Changes the length of the vector to 1.
 	def unit!
-		r = 1
-		_recalculate_cartesian
+		self.r = 1
 		return self
 	end
 	
@@ -220,11 +310,5 @@ class Rubygame::Vector
 	# the angle form TWO_PI.
 	def enclosed_angle(other)
 		return Math.acos(self.unit * other.unit)
-	end
-end
-
-module Rubygame
-	def Vector(*args)
-		return Vector.new(*args)
 	end
 end
