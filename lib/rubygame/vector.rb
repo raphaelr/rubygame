@@ -86,7 +86,7 @@ class Rubygame::Vector
 	PI = Math::PI
 	HALF_PI = PI / 2
 	QUARTER_PI = PI / 4
-	DOUBLE_PI = PI * 2
+	TWO_PI = PI * 2
 	FOUR_PI = PI * 4
 	
 	# Sets the phase to -PI/2.
@@ -94,11 +94,13 @@ class Rubygame::Vector
 		@@phase = -HALF_PI
 	end
 	
-	# Sets the phase to _pv_.
+	# Sets the phase to _pv_ and returns _pv_.
+	# If _pv_ is left out, this method will return the current phase.
 	# 
 	# pv:: the new phase
-	def self.phase(pv)
-		@@phase = pv
+	def self.phase(pv = nil)
+		@@phase = pv if pv
+		return @@phase
 	end
 	
 	# Initializes a new vector.
