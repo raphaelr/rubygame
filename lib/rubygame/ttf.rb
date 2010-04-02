@@ -37,9 +37,8 @@ Rubygame::VERSIONS[:sdl_ttf] = SDL::TTF.Linked_Version().to_ary
 class Rubygame::TTF
 
 
-  # Attempt to setup the TTF class for use by initializing SDL_ttf.
-  # This *must* be called before the TTF class can be used.
-  # Raises SDLError if there is a problem initializing SDL_ttf.
+  # Initializes SDL_ttf. This will get called automatically the first time
+  # SDL_ttf is needed.
   #
   def self.setup
     if( SDL::TTF.WasInit() == 0 and SDL::TTF.Init() != 0 )
