@@ -70,7 +70,10 @@ class Rubygame::TTF
   #        the bottom of the descent to the top of the ascent.)
   #
   def initialize( file, size )
-    self.class.setup
+    if( SDL::TTF.WasInit() == 0 )
+      raise( Rubygame::SDLError,
+             "You must call TTF.setup before opening a font." )
+    end
 
     @struct = SDL::TTF.OpenFont( file.to_s, size )
 
