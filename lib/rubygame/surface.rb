@@ -141,11 +141,28 @@ class Rubygame::Surface
                                     args[:depth], *args[:masks] )
   end
 
-  # Makes the surface dup-and cloneable. (raphaelr)
+  # Makes the surface dup-and cloneable.
   def initialize_copy(cop) # :nodoc:
     @struct = SDL.CreateRGBSurface(cop.flags, cop.w, cop.h, cop.depth, *cop.masks)
     rct = SDL::Rect.new([0, 0, cop.w, cop.h])
     SDL.BlitSurface(cop.struct, rct, @struct, rct)
+  end
+  
+  # Makes the surface marshalable.
+  def _dump(depth) # :nodoc:
+    return Marshal::dump([flags, alpha, colorkey, depth, w, h, pixels])
+  end
+  
+  # Makes the surface marshalable.
+  def self._load(str) # :nodoc:
+    data = Marshal::load(str)
+    
+    inst = new([data[4], data[5]], data[3], data[0])
+    inst.alpha = data[1]
+    inst.colorkey = data[2]
+    inst.pixels = data[6]
+    
+    return inst
   end
 
   private
@@ -260,6 +277,19 @@ class Rubygame::Surface
 
   public
 
+  # Sets pixel data directly.
+  def pixels=(pxdata)
+    SDL.LockSurface(@struct)
+    
+    # If surface_pxdata would be local, the GC will think there are no more
+    # references to this object after the method ends. However, SDL still
+    # needs it, so we use an instance variable to protect the data from
+    # garbage collection.
+    @surface_pxdata = FFI::MemoryPointer.from_string(pxdata)
+    @struct.pixels = @surface_pxdata
+    
+    SDL.UnlockSurface(@struct)
+  end
 
   # Return the width (in pixels) of the surface.
   #
