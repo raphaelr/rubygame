@@ -12,7 +12,7 @@ describe Vector do
 	
 	it "should raise an error for other parameters" do
 		proc { Vector(48) }.should raise_error
-		proc { Vector(:raphaels_coordinate_system, :left_up, :mars) }.should raise_error
+		proc { Vector(:raphaels_coordinate_system, :in, :sane) }.should raise_error
 		proc { Vector() }.should raise_error
 	end
 	
@@ -29,12 +29,12 @@ describe Vector do
 	
 	it "should calculate polar coordinates" do
 		a = Vector(4, 3)
-		a.r.should == 5
-		a.w.should be_close(Math.atan2(3, 4), 0.1)
+		a.m.should == 5
+		a.a.should be_close(Math.atan2(3, 4), 0.1)
 	end
 	
 	it "should calculate cartesian coordinates" do
-		a = Vector(:polar, 5, Vector::PI / 4)
+		a = Vector(:polar, Vector::PI / 4, 5)
 		a.x.should be_close(5 * Math.cos(Vector::PI / 4), 0.1)
 		a.y.should be_close(5 * Math.sin(Vector::PI / 4), 0.1)
 	end
@@ -49,7 +49,7 @@ describe Vector do
 		b.y.should == 1
 	end
 	
-	it "should negate vectors" do
+	it "should unary-minus vectors" do
 		a = Vector(2, 1)
 		b = -a
 		
@@ -111,7 +111,7 @@ describe Vector do
 		b = Vector(0, 1)
 		c = a.cross(b)
 		
-		c.r.should == 2
+		c.m.should == 2
 	end
 	
 	it "should scale two vectors" do
@@ -129,8 +129,8 @@ describe Vector do
 		a = Vector(15, 36)
 		b = a.unit
 		
-		b.r.should == 1
-		b.w.should == a.w
+		b.m.should == 1
+		b.a.should == a.a
 	end
 	
 	it "should calculate the enclosed angle" do
@@ -165,8 +165,8 @@ describe Vector do
 		b = Vector(2, 3)
 		a.unit!
 		
-		a.r.should == 1
-		a.w.should == b.w
+		a.m.should == 1
+		a.a.should == b.a
 	end
 	
 	it "should check if two vectors are normal" do
@@ -183,8 +183,8 @@ describe Vector do
 		a = Vector(5, 0)
 		b = Vector(0, 5)
 		
-		a.w.should be_close(-Vector::HALF_PI, 0.1)
-		b.w.should == 0.0
+		a.a.should be_close(-Vector::HALF_PI, 0.1)
+		b.a.should == 0.0
 		Vector.phase(0.0)
 	end
 end

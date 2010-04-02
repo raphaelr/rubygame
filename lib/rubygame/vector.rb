@@ -28,15 +28,15 @@ end
 # 
 # == Features:
 # formatting:: <tt>Vector#to_s</tt>, <tt>Vector#inspect</tt>
-#              <tt>Vector(4, 3).to_s       # => "Vector(4, 3)"
-#              <tt>Vector(4, 3).inspect    # => "Vector(4, 3); r=5.0; w=0.6435..."</tt>
+#              <tt>Vector(4, 3).to_s       # => "Vector(4/3)"
+#              <tt>Vector(4, 3).inspect    # => "Vector(4/3); a=0.6435...; m=5.0"</tt>
 # simplifying:: <tt>Vector#simplify</tt>, <tt>Vector#simplify!</tt>
 #               <tt>Vector(10, 5).simplify    # => Vector(2, 1)</tt>
 # unit vectors:: <tt>Vector#unit</tt>, <tt>Vector#unit!</tt>
 #                Sets the vector's length to 1.
 #                <tt>Vector(4, 3).unit    # => Vector(4/5, 3/5)</tt>
 # adding, substracting:: <tt>Vector#+</tt>, <tt>Vector#-</tt>
-#                        Simple vector math.
+#                        Basic vector math.
 #                        <tt>Vector(4, 3) + Vector(2, 9)    # => Vector(6, 12)</tt>
 # multiplication:: <tt>Vector#*</tt>
 #                  Multiplicates a vector with a number.
@@ -66,17 +66,20 @@ end
 # enclosed angle:: <tt>Vector#enclosed_angle</tt>
 #                  Returns the angle enclosed by two vectors.
 #                  <tt>Vector(10, 3).enclosed_angle(Vector(3, 7))    # => 0.8744...</tt>
-# polar coordinates:: <tt>Vector#r</tt>, <tt>Vector#r=</tt>, <tt>Vector#w</tt>, <tt>Vector#w=</tt>
-#                     Guess what they do.
+# polar coordinates:: <tt>Vector#m</tt>, <tt>Vector#a</tt>, <tt>Vector#m=</tt>, <tt>Vector#a=</tt>
+#                     Gets/Sets the angle and magnitude.
 # phase:: <tt>Vector::phase</tt>, <tt>Vector::rubygame</tt>
 #         Changes the way <tt>Vector#w</tt> and <tt>Vector#w=</tt> handles angles.
 #         <tt>Vector::rubygame</tt> sets the phase to -PI/2, so the "top" will be at
 #         zero rads.
 #         *NOTE:* changing this value will affect *ALL* already created vectors too!
 # 
-# <tt>Vector#r</tt>, <tt>Vector#r=</tt>, <tt>Vector#w</tt>, <tt>Vector#w=</tt> are aliased
+# <tt>Vector#m</tt>, <tt>Vector#m=</tt>, <tt>Vector#a</tt>, <tt>Vector#a=</tt> are aliased
 # as <tt>Vector#length</tt>, <tt>Vector#length=</tt>, <tt>Vector#angle</tt> and
 # <tt>Vector#angle=</tt> for your convenience.
+# 
+# <tt>Vector#m</tt> and <tt>Vector#m=</tt> are also aliased as <tt>Vector#magnitude</tt> and
+# <tt>Vector#magnitude=</tt> .
 # 
 # I want RDoc-Linebreaks. Now.
 class Rubygame::Vector
@@ -105,7 +108,7 @@ class Rubygame::Vector
 	# * one array, [_x_, _y_]
 	# * one vector
 	# * three parameters, _:cartesian_, _x_, _y_
-	# * three parameters, _:polar_, _r_, _w_
+	# * three parameters, _:polar_, _angle_, _magnitude_
 	def initialize(*args)
 		@@phase ||= 0.0
 		
@@ -126,8 +129,8 @@ class Rubygame::Vector
 			@y = args[2]
 			_recalculate_polar
 		elsif args.size == 3 && args[0] == :polar
-			@r = args[1]
-			@w = args[2]
+			@a = args[1]
+			@m = args[2]
 			_recalculate_cartesian
 		else
 			raise ArgumentError.new("Invalid constructor parameters!")
@@ -139,9 +142,9 @@ class Rubygame::Vector
 		return "Vector(#{x}/#{y})"
 	end
 	
-	# Returns a string in the format "Vector(_x_/_y_); r=_r_; w=_w_".
+	# Returns a string in the format "Vector(_x_/_y_); a=_angle_; m=_magnitude_".
 	def inspect
-		return "Vector(#{x}/#{y}); r=#{r}; w=#{w}"
+		return "Vector(#{x}/#{y}); m=#{m}; a=#{a}"
 	end
 	
 	# Checks if two vectors are the same.
@@ -165,14 +168,14 @@ class Rubygame::Vector
 	end
 	
 	def _recalculate_cartesian # :nodoc:
-		@x = r * Math.cos(w - @@phase)
-		@y = r * Math.sin(w - @@phase)
+		@x = @m * Math.cos(@a - @@phase)
+		@y = @m * Math.sin(@a - @@phase)
 	end
 	private :_recalculate_cartesian
 	
 	def _recalculate_polar # :nodoc:
-		@r = Math.sqrt(x * x + y * y)
-		@w = Math.atan2(y, x) + @@phase
+		@m = Math.sqrt(@x * @x + @y * @y)
+		@a = Math.atan2(@y, @x) + @@phase
 	end
 	private :_recalculate_polar
 	
@@ -194,29 +197,31 @@ class Rubygame::Vector
 	# Gets the y-Coordinate of _self_.
 	def y; return @y; end
 	
-	# Sets the length of the vector to _other_.
-	def r=(other)
-		@r = other
+	# Sets the magnitude of the vector to _other_.
+	def m=(other)
+		@m = other
 		_recalculate_cartesian
 	end
 	
 	# Gets the length of _self_.
-	def r; return @r; end
+	def m; return @m; end
 	
-	alias :length= :r=
-	alias :length :r
+	alias :length= :m=
+	alias :length :m
+	alias :magnitude= :m=
+	alias :magnitude :m
 	
 	# Sets the angle of the vector to _other_.
-	def w=(other)
-		@w = other
+	def a=(other)
+		@a = other
 		_recalculate_cartesian
 	end
 	
 	# Gets the angle of _self_.
-	def w; return @w; end
+	def a; return @a; end
 	
-	alias :angle= :w=
-	alias :angle :w
+	alias :angle= :a=
+	alias :angle :a
 	
 	# Unary Minus.
 	def -@
@@ -286,13 +291,13 @@ class Rubygame::Vector
 	
 	# Changes the length of the vector to 1.
 	def unit!
-		self.r = 1
+		self.m = 1
 		return self
 	end
 	
 	# Like _unit!_, but doesn't change self.
 	def unit
-		return self.class.new(:polar, 1, w)
+		return self.class.new(:polar, self.a, 1)
 	end
 	
 	# Checks if _self_ is normal at _other_.
@@ -306,7 +311,7 @@ class Rubygame::Vector
 	end
 	
 	# Returns the angle enclosed by _self_ and _other_.
-	# Returns only the first possibility, to get the second one substract
+	# Returns only the first possibile result, to get the second one substract
 	# the angle form TWO_PI.
 	def enclosed_angle(other)
 		return Math.acos(self.unit * other.unit)
