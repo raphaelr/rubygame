@@ -58,4 +58,7 @@ describe Screen do
     Screen.open?.should be_false
   end
 
+  it "should have a class method called 'icon='" do
+    Screen.respond_to?(:icon=).should be_true
+  end
 end

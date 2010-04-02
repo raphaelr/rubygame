@@ -4,9 +4,9 @@
 $:.unshift( File.join( File.dirname(__FILE__), "..", "lib" ) )
 $:.unshift( File.join( File.dirname(__FILE__), "..", "ext", "rubygame" ) )
 
+SDL_PATHS = ["e:/libs/sdl-1.2.14/sdl-bin/"]
 require 'rubygame'
 include Rubygame
-
 
 samples_dir = File.join( File.dirname(__FILE__), "..", "samples", "")
 test_dir = File.join( File.dirname(__FILE__), "" )
@@ -47,7 +47,39 @@ describe Surface, "(creation)" do
   end
 end
 
-
+describe Surface, "(marshalling)" do
+  it "should duplicate" do
+    srf_a = Surface.new([10, 20], 24)
+    srf_b = srf_a.dup
+    
+    srf_a.__id__.should_not == srf_b.__id__
+  end
+  
+  it "should duplicate the SDL_Surface" do
+    srf_a = Surface.new([10, 20], 23)
+    srf_a.fill([0, 0, 255, 255])
+    srf_b = srf_a.dup
+    
+    srf_a.get_at([0, 0]).should == [0, 0, 255, 255]
+    srf_b.get_at([0, 0]).should == [0, 0, 255, 255]
+    srf_b.fill([0, 255, 0])
+    srf_a.get_at([0, 0]).should == [0, 0, 255, 255]
+    srf_b.get_at([0, 0]).should == [0, 255, 0, 255]
+  end
+  
+  it "should marshal" do
+    srf_a = Surface.new([10, 20], 24)
+    srf_a.fill([255, 0, 0, 255])
+    
+    str = Marshal.dump(srf_a)
+    srf_b = Marshal.load(str)
+    
+    srf_a.w.should == srf_b.w
+    srf_a.h.should == srf_b.h
+    srf_a.depth.should == srf_b.depth
+    srf_b.get_at([0, 0]).should == [255, 0, 0, 255]
+  end
+end
 
 describe Surface, "(loading)" do
   before :each do

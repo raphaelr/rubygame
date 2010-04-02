@@ -1,6 +1,7 @@
 #--
 #	Rubygame -- Ruby code and bindings to SDL to facilitate game creation
 #	Copyright (C) 2004-2009  John Croisant
+#                    2010  Raphael Robatsch
 #
 #	This library is free software; you can redistribute it and/or
 #	modify it under the terms of the GNU Lesser General Public
@@ -151,7 +152,8 @@ class Rubygame::Screen < Rubygame::Surface
 
   end
 
-  # Sets the icon of the screen before creating it.
+  # Sets the icon of the screen before creating it. Use this method rather than
+  # the instance method to ensure the icon will show up on Windows too.
   def self.icon=(surf)
     SDL.WM_SetIcon(surf.struct, nil)
   end

@@ -65,3 +65,9 @@
   Email::         elcugo at gmail.com
   Contribution::  Patch to fix color conversion segfault on x86_64.
   Date::          2008-07-31
+
+- <b>Raphael Robatsch</b> / tape0
+  Email::         raphaelr@f-m.fm
+  Contribution::  Class-Method Screen::icon=, Marshallable and Copyable
+                  surface.
+  Date::          2010-04-02
