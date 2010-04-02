@@ -45,7 +45,7 @@ class Rubygame::Surface
 
 
   attr_reader :struct # :nodoc:
-  protected :struct
+  #protected :struct
   
   # call-seq:
   #   new( size, opts={} )
@@ -149,7 +149,7 @@ class Rubygame::Surface
   end
   
   # Makes the surface marshalable.
-  def _dump(depth) # :nodoc:
+  def _dump(useless_parameter) # :nodoc:
     return Marshal::dump([flags, alpha, colorkey, depth, w, h, pixels])
   end
   
@@ -157,11 +157,18 @@ class Rubygame::Surface
   def self._load(str) # :nodoc:
     data = Marshal::load(str)
     
-    inst = new([data[4], data[5]], data[3], data[0])
+    inst = load_from_pixels(data[6], [data[4], data[5]], data[3], data[0])
     inst.alpha = data[1]
     inst.colorkey = data[2]
-    inst.pixels = data[6]
     
+    return inst
+  end
+  
+  # Creates a surface of the size _size_ with a bit depth of _depth_ and flags
+  # _flags_ from pixel data _pixels_.
+  def self.load_from_pixels(pixels, size, depth, flags = [])
+    inst = new(size, depth, flags)
+    inst.pixels = pixels
     return inst
   end
 

@@ -151,7 +151,10 @@ class Rubygame::Screen < Rubygame::Surface
 
   end
 
-
+  # Sets the icon of the screen before creating it.
+  def self.icon=(surf)
+    SDL.WM_SetIcon(surf.struct, nil)
+  end
 
   # call-seq:
   #   new( size, opts={} )
