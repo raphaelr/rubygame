@@ -46,8 +46,7 @@ class Rubygame::Surface
 
   attr_reader :struct # :nodoc:
   protected :struct
-
-
+  
   # call-seq:
   #   new( size, opts={} )
   #   new( size, depth=0, flags=[] )  # DEPRECATED
@@ -142,6 +141,12 @@ class Rubygame::Surface
                                     args[:depth], *args[:masks] )
   end
 
+  # Makes the surface dup-and cloneable. (raphaelr)
+  def initialize_copy(cop) # :nodoc:
+    @struct = SDL.CreateRGBSurface(cop.flags, cop.w, cop.h, cop.depth, *cop.masks)
+    rct = SDL::Rect.new([0, 0, cop.w, cop.h])
+    SDL.BlitSurface(cop.struct, rct, @struct, rct)
+  end
 
   private
 
